@@ -22,7 +22,7 @@ int rounder(int a, int b, int max = 100)
 int screen_height = rounder(char_size, 500);
 // width for buttons (for when figuring out when to add newlines
 int button_width = 40;
-// for making tue text;
+// for making the text;
 void default_text(sf::Text& t, int x, int y, sf::Color c, int size)
 {
     t.setCharacterSize(size);
@@ -128,7 +128,7 @@ int main(int argc, const char* argv[])
 {
     sf::RenderWindow window(sf::VideoMode(screen_width, screen_height), "SFML works!");
     //font
-    font.loadFromFile("F:\\CPP\\Programs\\GraphicalTextEditor\\bin\\Release\\UbuntuMono-B.ttf");
+    font.loadFromFile("F:\\CPP\\Programs\\GraphicalTextEditor\\bin\\Release\\Courier Regular.ttf");
     //slower framerate (less button presses it)
     window.setFramerateLimit(30);
     //check if we have file
@@ -166,8 +166,8 @@ int main(int argc, const char* argv[])
             int i ;
     bool was_change = true;
     bool arrow_pressed = false;
-    bool hasMoved = false;
-    bool hasRMoved = false;
+    int movementCounter = 0;
+    int movementFrame = 5;
     // main loop
     while (window.isOpen())
     {
@@ -206,7 +206,9 @@ int main(int argc, const char* argv[])
                 }
             }
             // change size of text
-            if(event.type == sf::Event::MouseWheelScrolled)
+            if(event.type == sf::Event::MouseWheelScrolled &&
+                (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) ||sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+            )
             {
                 was_change = true;
                 if(event.mouseWheelScroll.delta > 0)
@@ -214,38 +216,71 @@ int main(int argc, const char* argv[])
                 if(event.mouseWheelScroll.delta < 0 && char_size - 5 > 0)
                     char_size -= 5;
             }
+            if(event.type == sf::Event::MouseWheelScrolled)
+            {
+                was_change = true;
+                if(event.mouseWheelScroll.delta < 0)
+                {
+                    while(true){
+                        char_on += 1;
+                        if(text[char_on] == '\n')
+                        {
+                            break;
+                        }
+                        if(char_on > text.size() - 1)
+                        {
+                            char_on = text.size() - 1;
+                            break;
+                        }
+                    }
+                    was_change = true;
+                    arrow_pressed = true;
+                }
+                if(event.mouseWheelScroll.delta > 0)
+                {
+                while(true){
+                    char_on -= 1;
+                    if(text[char_on] == '\n')
+                    {
+                        break;
+                    }
+                    if(char_on < 0)
+                    {
+                        char_on = 0;
+                        break;
+                    }
+                }
+                was_change = true;
+                arrow_pressed = true;
+
+                }
+            }
         }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && char_on > 0 && hasMoved == false)
+        movementCounter++;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && char_on > 0 && movementCounter%movementFrame==0)
         {
-            hasMoved = true;
             char_on--;
             was_change = true;
             arrow_pressed = true;
         }
-        if(hasMoved == true && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            hasMoved = false;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
-           (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) ||sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))&& hasMoved == false
+           (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) ||sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))&& movementCounter%movementFrame==0
             && char_on > 0)
         {
-            hasMoved = true;
             char_on -= 9;
             if(char_on < 0)
                 char_on = 0;
             was_change = true;
             arrow_pressed = true;
         }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && char_on < text.size() - 1 && hasRMoved == false)
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && char_on < text.size() - 1&& movementCounter%movementFrame==0 )
         {
-            hasRMoved = true;
             char_on++;
             was_change = true;
             arrow_pressed = true;
         }
-        if(hasRMoved == true && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            hasRMoved = false;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)&&
-           (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) ||sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) && hasRMoved == false
+           (sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) ||sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))&& movementCounter%movementFrame==0
              && char_on < text.size() - 1)
         {
             char_on += 9;
@@ -276,7 +311,7 @@ int main(int argc, const char* argv[])
                     line_char_num++;
                     if(j >= text.size())
                         break;
-                    if(text[j] == '\n' ||line_char_num * char_size/1.5 > screen_width - button_width)
+                    if(text[j] == '\n' ||line_char_num * char_size > screen_width - button_width)
                     {
                         k++;
                         line_char_num = 0;
@@ -302,7 +337,7 @@ int main(int argc, const char* argv[])
                         buff[i + a_chars] = '|';
                     }
                     line_char_num ++;
-                    if(line_char_num * char_size/1.5 > screen_width - button_width)
+                    if(line_char_num * char_size > screen_width - button_width)
                     {
                         a_chars++;
                         for( int j = text.size() + a_chars; j >= 0;j--)
